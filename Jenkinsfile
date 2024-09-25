@@ -10,7 +10,7 @@ library identifier: 'jenkins-shared-library@master', retriever: modernSCM(
 pipeline {
     agent any
     tools {
-        maven 'maven-3.9'
+        maven 'Maven'
     }
     stages {
         stage('increment version') {
@@ -61,7 +61,7 @@ pipeline {
         stage('commit version update'){
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'gitlab-credentials', passwordVariable: 'PASS', usernameVariable: 'USER')]){
+                    withCredentials([usernamePassword(credentialsId: 'github-credentials', passwordVariable: 'PASS', usernameVariable: 'USER')]){
                         sh 'git remote set-url origin https://$USER:$PASS@https://github.com/TsembA/jma-deploy-to-ec2.git'
                         sh 'git add .'
                         sh 'git commit -m "ci: version bump"'
