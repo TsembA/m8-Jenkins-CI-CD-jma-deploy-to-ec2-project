@@ -1,6 +1,3 @@
-#!/usr/bin/env bash
-
-
 #!/bin/bash
 set -e
 apt update -y
