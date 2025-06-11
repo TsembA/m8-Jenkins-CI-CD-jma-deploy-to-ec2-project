@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
+echo "[+] Updating system..."
 apt update -y
-apt install -y python3-pip
-python3 -m pip install --upgrade pip
-pip install boto3 botocore
+echo "[+] Installing Python dependencies..."
+apt install -y python3-pip python3-boto3 python3-botocore
