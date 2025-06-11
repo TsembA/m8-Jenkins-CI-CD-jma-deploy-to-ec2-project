@@ -17,7 +17,6 @@
 - name: Install Docker-compose
   hosts: aws_ec2
   become: yes
-  become_user: tsemb
   tasks:
     - name: Create Docker-compose dir
       file:
