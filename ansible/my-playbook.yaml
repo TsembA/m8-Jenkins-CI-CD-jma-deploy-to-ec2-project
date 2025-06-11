@@ -8,21 +8,28 @@
         name: docker
         update_cache: yes
         state: present
-    - name: Start Docker deamon
+
+    - name: Start Docker daemon
       systemd:
         name: docker
         state: started
-# Fetch and install Docker-compose
-- name: Install Docker-compose
+
+- name: Install Docker Compose
   hosts: aws_ec2
   become: yes
   tasks:
-    - name: Create Docker-compose dir
+    - name: Create Docker Compose dir
       file:
-        path: ~/.docker/cli-plugins
+        path: /home/ec2-user/.docker/cli-plugins
         state: directory
-    - name: Install Docker-compose
+        owner: ec2-user
+        group: ec2-user
+        mode: '0755'  # исправлено с +x
+
+    - name: Install Docker Compose
       get_url:
         url: https://github.com/docker/compose/releases/download/v2.26.1/docker-compose-linux-x86_64
         dest: /home/ec2-user/.docker/cli-plugins/docker-compose
-        mode: +x
+        mode: '0755'  # исправлено с +x
+        owner: ec2-user
+        group: ec2-user
