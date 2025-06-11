@@ -1,0 +1,30 @@
+---
+- name: Install Docker
+  hosts: aws_ec2
+  become: yes
+  become_user: root
+  tasks:
+    - name: Install Docker
+      yum:
+        name: docker
+        update_cache: yes
+        state: present
+    - name: Start Docker deamon
+      systemd:
+        name: docker
+        state: started
+# Fetch and install Docker-compose
+- name: Install Docker-compose
+  hosts: aws_ec2
+  become: yes
+  become_user: tsemb
+  tasks:
+    - name: Create Docker-compose dir
+      file:
+        path: ~/.docker/cli-plugins
+        state: directory
+    - name: Install Docker-compose
+      get_url:
+        url: https://github.com/docker/compose/releases/download/v2.26.1/docker-compose-linux-x86_64
+        dest: /home/tsemb/.docker/cli-plugins/docker-compose
+        mode: +x
