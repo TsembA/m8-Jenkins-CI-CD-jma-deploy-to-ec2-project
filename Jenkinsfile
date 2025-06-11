@@ -1,4 +1,4 @@
-#!/usr/bin.env groovy
+#!/usr/bin/env groovy
 pipeline {   
     agent any
     environment{
@@ -11,9 +11,11 @@ pipeline {
                     echo "Copying all neccessary files to ansible control node"
                     sshagent(['ansible-server-key']){
                         sh "scp -o StrictHostKeyChecking=no ansible/* root@${ANSIBLE_SERVER}:/root"
+                        sh "scp prepare-ansible-server.sh root@${ANSIBLE_SERVER}:/root/"
                         withCredentials([sshUserPrivateKey(credentialsId: 'ec2-server-key', keyFileVariable: 'keyfile', usernameVariable:'user')]) {
                             sh 'scp $keyfile root@${ANSIBLE_SERVER}:/root/.ssh/ssh-key.pem'
                         }
+                        
                     }
                 }
 
