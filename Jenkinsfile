@@ -1,51 +1,36 @@
-pipeline {
+#!/usr/bin.env groovy
+pipeline {   
     agent any
-
-    environment {
-        ANSIBLE_SERVER = "147.182.246.112"
-    }
-
     stages {
-        stage("Copy files to Ansible server") {
-            steps {
-                script {
-                    echo "Copying files to Ansible server"
-                    
-                    sshagent(['ansible-server-key']) {
-                        sh "scp -o StrictHostKeyChecking=no ansible/* root@$ANSIBLE_SERVER:/root"
-                    }
-
-                    withCredentials([sshUserPrivateKey(credentialsId: 'ec2-server-key', keyFileVariable: 'keyfile', usernameVariable: 'user')]) {
-                        sh "scp -o StrictHostKeyChecking=no \$keyfile root@$ANSIBLE_SERVER:/root/ssh-key.pem"
+        stage("copy files to ansible server") {
+            steps{
+                script{
+                    echo "Copying all neccessary files to ansible control node"
+                    sshagent(['ansible-server-key']){
+                        sh "scp -o StrictHostKeyChecking=no ansible/* root@147.182.246.112:/root"
+                        withCredentials([sshUserPrivateKey(credentialsId: 'ec2-server-key', keyFileVariable: 'keyfile', usernameVariable:'user')]) {
+                            sh 'scp $keyfile root@147.182.246.112:/root/ssh-key.pem'
+                        }
                     }
                 }
+
             }
         }
-
-        stage("Run Ansible playbook") {
-            steps {
-                script {
-                    echo "Running Ansible playbook"
-                    
+        stage("execute ansible playbook"){
+            steps{
+                script{
+                    echo "Calling ansible playbook to configure EC2 instances"
                     def remote = [:]
                     remote.name = "ansible-server"
-                    remote.host = ANSIBLE_SERVER
+                    remote.host = "147.182.246.112"
                     remote.allowAnyHosts = true
 
-                    withCredentials([sshUserPrivateKey(credentialsId: 'ansible-server-key', keyFileVariable: 'keyfile', usernameVariable: 'user')]) {
+                    withCredentials([sshUserPrivateKey(credentialsId: 'ansible-server-key', keyFileVariable: 'keyfile', usernameVariable:'user')]) {
                         remote.user = user
                         remote.identityFile = keyfile
-
-                        // Optional: Prepare the environment (like moving keys or setting permissions)
-                        sshCommand remote: remote, command: '''
-                            mkdir -p /root/.ssh
-                            mv /root/ssh-key.pem /root/.ssh/ssh-key.pem
-                            chmod 600 /root/.ssh/ssh-key.pem
-                        '''
-
-                        // Run the playbook
-                        sshCommand remote: remote, command: "ansible-playbook /root/my-playbook.yaml"
+                        sshCommand remote: remote, command: "ls -l "
                     }
+                    
                 }
             }
         }
