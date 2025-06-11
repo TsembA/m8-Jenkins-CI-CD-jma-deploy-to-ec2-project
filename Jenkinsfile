@@ -1,15 +1,18 @@
 #!/usr/bin.env groovy
 pipeline {   
     agent any
+    environment{
+        ANSIBLE_SERVER = "147.182.246.112"
+    }
     stages {
         stage("copy files to ansible server") {
             steps{
                 script{
                     echo "Copying all neccessary files to ansible control node"
                     sshagent(['ansible-server-key']){
-                        sh "scp -o StrictHostKeyChecking=no ansible/* root@147.182.246.112:/root"
+                        sh "scp -o StrictHostKeyChecking=no ansible/* root@${ANSIBLE_SERVER}:/root"
                         withCredentials([sshUserPrivateKey(credentialsId: 'ec2-server-key', keyFileVariable: 'keyfile', usernameVariable:'user')]) {
-                            sh 'scp $keyfile root@147.182.246.112:/root/.ssh/ssh-key.pem'
+                            sh 'scp $keyfile root@${ANSIBLE_SERVER}:/root/.ssh/ssh-key.pem'
                         }
                     }
                 }
@@ -22,7 +25,7 @@ pipeline {
                     echo "Calling ansible playbook to configure EC2 instances"
                     def remote = [:]
                     remote.name = "ansible-server"
-                    remote.host = "147.182.246.112"
+                    remote.host = ANSIBLE_SERVER
                     remote.allowAnyHosts = true
 
                     withCredentials([sshUserPrivateKey(credentialsId: 'ansible-server-key', keyFileVariable: 'keyfile', usernameVariable:'user')]) {
